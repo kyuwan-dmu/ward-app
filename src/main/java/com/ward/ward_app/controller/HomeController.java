@@ -1,8 +1,12 @@
 package com.ward.ward_app.controller;
 
+import com.ward.ward_app.dto.MessageRequestDTO;
 import com.ward.ward_app.service.HomeService;
+import com.ward.ward_app.vo.MessageVO;
 import com.ward.ward_app.vo.HomeVO;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -19,5 +23,15 @@ public class HomeController {
 	@GetMapping("/info")
 	public HomeVO info() {
 		return homeService.getHomeData();
+	}
+
+	@GetMapping("/hello")
+	public MessageVO hello() {
+		return homeService.getHelloMessage();
+	}
+
+	@PostMapping("/messages")
+	public MessageVO createMessage(@RequestBody MessageRequestDTO requestDTO) {
+		return homeService.createMessage(requestDTO);
 	}
 }
