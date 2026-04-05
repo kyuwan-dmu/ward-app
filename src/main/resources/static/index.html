@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+	<meta charset="UTF-8">
+	<title>Ward App</title>
+	<style>
+		body {
+			font-family: Arial, sans-serif;
+			background: #f5f6fa;
+			color: #333;
+			margin: 0;
+			padding: 0;
+		}
+		.container {
+			max-width: 640px;
+			margin: 64px auto;
+			padding: 32px;
+			background: #fff;
+			border-radius: 12px;
+			box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+		}
+		h1 {
+			margin-top: 0;
+		}
+		pre {
+			background: #1e1e1e;
+			color: #c9d1d9;
+			padding: 16px;
+			border-radius: 8px;
+			overflow-x: auto;
+		}
+		footer {
+			margin-top: 32px;
+			font-size: 0.85rem;
+			color: #666;
+		}
+	</style>
+</head>
+<body>
+<div class="container">
+	<h1>Ward App is running</h1>
+	<p>아래 정보는 <code>/api/info</code> 엔드포인트에서 가져온 값입니다.</p>
+	<pre id="info">Loading...</pre>
+	<footer>
+		API가 정상 동작 중입니다. 다른 엔드포인트도 <code>/api/hello</code>, <code>/api/messages</code> 로 확인할 수 있습니다.
+	</footer>
+</div>
+
+<script>
+	async function loadInfo() {
+		try {
+			const response = await fetch('/api/info');
+			if (!response.ok) {
+				throw new Error(`HTTP ${response.status}`);
+			}
+			const data = await response.json();
+			document.getElementById('info').textContent = JSON.stringify(data, null, 2);
+		} catch (error) {
+			document.getElementById('info').textContent = 'Failed to load info: ' + error.message;
+		}
+	}
+
+	loadInfo();
+</script>
+</body>
+</html>
