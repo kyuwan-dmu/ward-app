@@ -40,4 +40,12 @@ public class HomeService {
 			content
 		);
 	}
+
+	public MessageVO simplePostAck() {
+		return new MessageVO(
+			"POST",
+			"system",
+			"post request received"
+		);
+	}
 }
