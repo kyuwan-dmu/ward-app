@@ -34,4 +34,9 @@ public class HomeController {
 	public MessageVO createMessage(@RequestBody MessageRequestDTO requestDTO) {
 		return homeService.createMessage(requestDTO);
 	}
+
+	@PostMapping("/ping")
+	public MessageVO simplePost() {
+		return homeService.simplePostAck();
+	}
 }
