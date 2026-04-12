@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>WARD</title>
+	<link rel="stylesheet" href="/styles.css">
+</head>
+<body>
+	<div class="page">
+		<header class="topbar">
+			<div class="brand-wrap">
+				<div class="brand">WARD</div>
+				<div class="tagline" id="tagline">동네 기반 음식 추천</div>
+			</div>
+			<div class="auth">
+				<div class="welcome" id="welcome-message">강아지 님 환영합니다!</div>
+				<div class="actions">
+					<button type="button" class="outline-button accent">로그아웃</button>
+					<button type="button" class="outline-button">마이 페이지</button>
+				</div>
+			</div>
+		</header>
+
+		<main class="content">
+			<section class="search-panel">
+				<div class="search-box">
+					<input id="location-input" type="text" value="구일역" aria-label="지역 검색">
+					<button type="button" class="search-button" aria-label="검색"></button>
+				</div>
+			</section>
+
+			<section class="weather-panel">
+				<div class="weather-title" id="weather-location">구일역의 날씨</div>
+				<div class="weather-card">
+					<div class="weather-main">
+						<span class="weather-icon">⛅</span>
+						<span class="temperature" id="weather-temperature">22.6°</span>
+						<span class="status" id="weather-status">흐림</span>
+					</div>
+					<div class="weather-meta">
+						<div>미세먼지 <strong id="dust-status">좋음</strong></div>
+						<div>체감온도 <strong id="feels-like">20.3°</strong></div>
+					</div>
+				</div>
+			</section>
+
+			<section class="map-panel">
+				<div class="mock-map" id="map">
+					<div class="river"></div>
+					<div class="road road-primary"></div>
+					<div class="road road-secondary"></div>
+					<div class="road road-diagonal"></div>
+					<div class="label station">구일역</div>
+					<div class="label district">고척동</div>
+					<div class="label river-name">안양천</div>
+					<div class="marker marker-1">1</div>
+					<div class="marker marker-2">2</div>
+					<div class="marker marker-3">3</div>
+					<div class="marker marker-4">4</div>
+				</div>
+			</section>
+
+			<section class="restaurant-panel">
+				<div class="restaurant-list" id="restaurant-list"></div>
+			</section>
+		</main>
+	</div>
+
+	<script src="/app.js"></script>
+</body>
+</html>

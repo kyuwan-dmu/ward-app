@@ -35,3 +35,7 @@ out/
 
 ### VS Code ###
 .vscode/
+
+### Codex temp ###
+.codex_tmp_pdf/
+pdf_extract/

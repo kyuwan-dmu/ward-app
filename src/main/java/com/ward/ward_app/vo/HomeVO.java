@@ -2,31 +2,64 @@ package com.ward.ward_app.vo;
 
 public class HomeVO {
 
-	private final String title;
-	private final String description;
-	private final String architecture;
-	private final String runtime;
+	private final String serviceName;
+	private final String subtitle;
+	private final String welcomeMessage;
+	private final String location;
+	private final String weatherStatus;
+	private final String temperature;
+	private final String dustStatus;
+	private final String feelsLike;
 
-	public HomeVO(String title, String description, String architecture, String runtime) {
-		this.title = title;
-		this.description = description;
-		this.architecture = architecture;
-		this.runtime = runtime;
+	public HomeVO(
+		String serviceName,
+		String subtitle,
+		String welcomeMessage,
+		String location,
+		String weatherStatus,
+		String temperature,
+		String dustStatus,
+		String feelsLike
+	) {
+		this.serviceName = serviceName;
+		this.subtitle = subtitle;
+		this.welcomeMessage = welcomeMessage;
+		this.location = location;
+		this.weatherStatus = weatherStatus;
+		this.temperature = temperature;
+		this.dustStatus = dustStatus;
+		this.feelsLike = feelsLike;
 	}
 
-	public String getTitle() {
-		return title;
+	public String getServiceName() {
+		return serviceName;
 	}
 
-	public String getDescription() {
-		return description;
+	public String getSubtitle() {
+		return subtitle;
 	}
 
-	public String getArchitecture() {
-		return architecture;
+	public String getWelcomeMessage() {
+		return welcomeMessage;
 	}
 
-	public String getRuntime() {
-		return runtime;
+	public String getLocation() {
+		return location;
+	}
+
+	public String getWeatherStatus() {
+		return weatherStatus;
+	}
+
+	public String getTemperature() {
+		return temperature;
+	}
+
+	public String getDustStatus() {
+		return dustStatus;
+	}
+
+	public String getFeelsLike() {
+		return feelsLike;
 	}
 }
