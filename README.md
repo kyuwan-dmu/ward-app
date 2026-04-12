@@ -1,7 +1,9 @@
-﻿# ward-app
+# ward-app
 
-`ward-app`은 Spring Initializr로 생성한 프로젝트를 REST API 실습용으로 정리한 Spring Boot 백엔드 예제입니다.
-화면 렌더링보다는 JSON 기반 API 통신을 중심으로 사용하고, 구조는 한국식 실습 프로젝트에서 자주 보는 `Controller -> Service -> VO` 흐름을 기준으로 잡았습니다.
+`ward-app`은 프로젝트분석설계 수업에서 예제로 사용할 수 있도록 만든 간단한 Spring Boot 목업 서비스입니다.
+현재 버전은 `WARD`라는 이름의 동네 음식 추천 화면을 중심으로 구성되어 있고, 실행하면 메인 화면에서 고척동/구일역 주변 지도 형태의 화면과 음식점 목록이 바로 보입니다.
+
+이 프로젝트는 완성형 상용 서비스가 아니라, 한 학기 프로젝트를 설명하거나 시연할 때 사용할 수 있는 학습용 예제에 초점을 둡니다.
 
 ## 1. 개발 환경
 
@@ -10,21 +12,33 @@
 - Spring Boot 4.0.5
 - Spring Web MVC
 - 로컬 실행: Spring Boot 내장 Tomcat
-- 외부 배포: Apache Tomcat WAR 배포
+- 외부 배포: Apache Tomcat WAR 배포 가능
 
-## 2. 프로젝트 용도
+## 2. 프로젝트 목적
 
-이 프로젝트는 프론트 화면을 많이 구성하는 웹사이트보다는, 백엔드 REST API를 만드는 실습용 프로젝트에 가깝습니다.
-현재 목적은 다음과 같습니다.
+이 프로젝트의 목적은 다음과 같습니다.
 
-- Spring Boot 기본 구조 익히기
-- Controller, Service, VO 계층 흐름 익히기
-- JSON 응답 방식의 API 만들기
-- 이후 DB 연동 시 DAO 또는 Repository 계층 확장하기
+- Spring Boot 기본 프로젝트 구조 익히기
+- `Controller -> Service -> VO` 흐름 익히기
+- 정적 화면과 JSON API를 함께 구성하는 방법 익히기
+- 이후 DB, 회원 기능, 리뷰 기능 등으로 확장할 수 있는 시작점 만들기
 
-즉 현재 프로젝트는 `템플릿 화면 중심 MVC`보다 `REST API 중심의 계층형 백엔드 구조`에 맞춰 두는 것이 적절합니다.
+즉, 현재 프로젝트는 단순 REST API 실습만을 위한 구조가 아니라, 수업에서 설명하기 쉬운 `화면 + 샘플 API` 예제입니다.
 
-## 3. 현재 구조
+## 3. 현재 구현 내용
+
+기동 후 `http://localhost:8080` 으로 접속하면 다음과 같은 메인 화면이 표시됩니다.
+
+- 상단 브랜드 헤더
+- 검색창
+- 날씨 정보 영역
+- 고척동/구일역 주변을 표현한 지도 목업
+- 음식점 목록 카드
+
+실제 지도 API 연동보다는, 시안과 흐름을 보여주기 위한 목업 화면에 가깝습니다.
+수업용 예제이므로 구조는 단순하게 유지하고 데이터는 하드코딩된 샘플 데이터를 사용합니다.
+
+## 4. 프로젝트 구조
 
 ```text
 ward-app
@@ -36,13 +50,19 @@ ward-app
 │  │  │  │  └─ HomeController.java
 │  │  │  ├─ service
 │  │  │  │  └─ HomeService.java
+│  │  │  ├─ dto
+│  │  │  │  └─ MessageRequestDTO.java
 │  │  │  ├─ vo
-│  │  │  │  └─ HomeVO.java
+│  │  │  │  ├─ HomeVO.java
+│  │  │  │  ├─ MessageVO.java
+│  │  │  │  └─ RestaurantVO.java
 │  │  │  ├─ ServletInitializer.java
 │  │  │  └─ WardAppApplication.java
 │  │  └─ resources
 │  │     ├─ static
-│  │     ├─ templates
+│  │     │  ├─ index.html
+│  │     │  ├─ styles.css
+│  │     │  └─ app.js
 │  │     └─ application.properties
 │  └─ test
 │     └─ java/com/ward/ward_app
@@ -50,57 +70,60 @@ ward-app
 └─ README.md
 ```
 
-## 4. 구성 설명
+## 5. 구성 설명
 
 ### `WardAppApplication`
 
 - Spring Boot 애플리케이션 시작 클래스입니다.
-- 로컬에서 실행할 때 사용합니다.
 
 ### `ServletInitializer`
 
-- WAR 파일을 외부 Apache Tomcat에 배포할 때 사용합니다.
-- 로컬 실행에서는 직접 신경 쓸 일이 거의 없지만, 외부 톰캣 배포를 위해 유지합니다.
+- WAR 파일을 외부 Tomcat에 배포할 때 사용하는 초기화 클래스입니다.
 
 ### `controller`
 
-- 클라이언트 요청을 가장 먼저 받는 계층입니다.
-- 현재는 `HomeController`가 `/api/info` 요청을 받고 JSON 데이터를 반환합니다.
+- 요청을 받는 계층입니다.
+- 현재는 메인 화면에서 사용하는 샘플 API를 제공합니다.
 
 ### `service`
 
-- 컨트롤러와 데이터 객체 사이에서 처리 로직을 담당합니다.
-- 현재는 `HomeService`가 응답용 데이터를 만들어 반환합니다.
+- 화면과 API에서 사용할 데이터를 조립하는 계층입니다.
+- 현재는 날씨 정보와 음식점 목록을 하드코딩 데이터로 반환합니다.
+
+### `dto`
+
+- 요청 데이터를 담는 객체입니다.
+- 현재는 POST 예제용 `MessageRequestDTO`가 있습니다.
 
 ### `vo`
 
 - 응답 데이터를 담는 객체입니다.
-- 현재는 `HomeVO`가 API 응답 JSON의 구조 역할을 합니다.
+- `HomeVO`, `MessageVO`, `RestaurantVO`를 사용합니다.
 
 ### `static`
 
-- 정적 파일 경로입니다.
-- 이 프로젝트는 화면 중심 프로젝트가 아니므로 당장은 비워 두어도 괜찮습니다.
+- 메인 화면을 구성하는 정적 리소스 경로입니다.
+- 현재 프로젝트의 첫 화면은 `static/index.html`을 통해 표시됩니다.
 
-### `templates`
+## 6. 현재 API
 
-- 서버 사이드 HTML 템플릿 경로입니다.
-- 현재는 REST API 중심 프로젝트이므로 사용하지 않습니다.
-- 나중에 관리용 화면이나 테스트용 페이지가 필요할 때만 사용하면 됩니다.
+### `GET /api/info`
 
-## 5. 현재 API 흐름
+메인 화면 상단에 필요한 기본 정보와 날씨 표시용 데이터를 반환합니다.
 
-현재 예제 요청 흐름은 아래와 같습니다.
+### `GET /api/restaurants`
 
-1. 클라이언트가 `GET /api/info` 요청을 보냅니다.
-2. `HomeController`가 요청을 받습니다.
-3. `HomeService`를 호출합니다.
-4. `HomeService`가 `HomeVO`를 생성합니다.
-5. `HomeVO`가 JSON으로 직렬화되어 응답됩니다.
+음식점 목록 샘플 데이터를 반환합니다.
 
-즉 현재 구조는 화면 반환이 아니라 `Controller -> Service -> VO -> JSON Response` 흐름입니다.
+### `GET /api/hello`
 
-## 6. 실행 방법
+기본 동작 확인용 예제 API입니다.
+
+### `POST /api/messages`
+
+간단한 요청/응답 구조를 보여주기 위한 POST 예제 API입니다.
+
+## 7. 실행 방법
 
 ### 로컬 실행
 
@@ -116,13 +139,17 @@ ward-app
 http://localhost:8080
 ```
 
-예제 API:
+메인 화면:
 
 ```text
-GET http://localhost:8080/api/info
+GET http://localhost:8080/
 ```
 
-브라우저에서 `/`로 접속하면 별도 화면이 없기 때문에 404가 나올 수 있습니다. 현재 프로젝트 목적상 이것은 정상입니다.
+음식점 목록 API:
+
+```text
+GET http://localhost:8080/api/restaurants
+```
 
 ### 테스트 실행
 
@@ -136,24 +163,28 @@ GET http://localhost:8080/api/info
 .\gradlew.bat bootWar
 ```
 
-생성된 WAR 파일을 외부 Apache Tomcat의 `webapps` 디렉토리에 배포할 수 있습니다.
+생성된 WAR 파일은 외부 Apache Tomcat에 배포할 수 있습니다.
 
-## 7. 왜 처음에 Whitelabel Error Page가 떴는가
+## 8. 학습용 프로젝트로서의 특징
 
-초기 상태에서는 `/` 요청을 처리할 컨트롤러나 정적 페이지가 없었습니다.
-그래서 서버는 정상적으로 실행됐지만 루트 경로를 찾지 못해 `404 Not Found`가 발생했고, 별도의 오류 페이지 설정이 없어서 Spring Boot 기본 화면인 Whitelabel Error Page가 보였습니다.
+이 프로젝트는 학습용 예제이므로 다음 원칙을 따릅니다.
 
-현재는 프로젝트 목적을 REST API 중심으로 잡았기 때문에, `/` 경로에 화면을 억지로 두지 않고 `/api/info` 같은 API 엔드포인트를 사용하는 방향이 더 자연스럽습니다.
+- 화면은 단순하고 직관적으로 구성
+- 계층 구조는 최소한으로 유지
+- 데이터는 우선 하드코딩으로 처리
+- 나중에 DB 연동이나 로그인 기능으로 확장 가능
 
-## 8. 앞으로 추천하는 확장 구조
+처음부터 너무 많은 기능을 넣기보다, 기본 구조를 이해하고 점진적으로 확장하는 데 적합한 예제입니다.
 
-기능이 늘어나면 아래처럼 확장하면 됩니다.
+## 9. 앞으로 확장할 수 있는 방향
 
-- `controller/member/MemberController`
-- `service/member/MemberService`
-- `vo/member/MemberVO`
-- 필요 시 `dao/member/MemberDAO` 또는 `repository/member/MemberRepository`
-- 요청/응답이 분리되면 `dto` 패키지 추가
-- DB 연동이 들어가면 `entity` 또는 `domain` 패키지 추가
+수업 진행에 따라 아래와 같은 확장이 가능합니다.
 
-실습 기준으로는 처음부터 너무 많은 계층을 만들기보다, 현재처럼 `Controller -> Service -> VO`로 시작하고 기능이 늘 때 `DAO/Repository`, `DTO`, `Entity`를 추가하는 편이 더 적절합니다.
+- 회원가입 / 로그인
+- 리뷰 작성 / 리뷰 조회
+- 지역 검색 기능
+- 실제 지도 API 연동
+- DB 연동을 위한 `repository` 또는 `dao` 계층 추가
+- 관리자 화면 또는 상세 음식점 페이지 추가
+
+현재 버전은 그 출발점이 되는 목업 프로젝트입니다.
