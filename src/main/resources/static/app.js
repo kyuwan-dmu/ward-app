@@ -3,14 +3,28 @@ const restaurantEndpoint = "/api/restaurants";
 
 function createStars(rating) {
 	const fullStars = Math.round(rating);
-	return "★★★★★"
+	return "*****"
 		.split("")
-		.map((star, index) => (index < fullStars ? star : "☆"))
+		.map((star, index) => (index < fullStars ? star : "-"))
 		.join("");
 }
 
 function renderRestaurants(restaurants) {
 	const list = document.getElementById("restaurant-list");
+
+	if (!restaurants.length) {
+		list.innerHTML = `
+			<article class="restaurant-card">
+				<div class="thumb" aria-hidden="true"></div>
+				<div>
+					<div class="restaurant-name">No restaurants found.</div>
+					<div class="restaurant-sub">Insert sample rows into MySQL first.</div>
+				</div>
+			</article>
+		`;
+		return;
+	}
+
 	list.innerHTML = restaurants.map((restaurant) => `
 		<article class="restaurant-card">
 			<div class="thumb" aria-hidden="true"></div>
@@ -23,8 +37,8 @@ function renderRestaurants(restaurants) {
 				<div class="restaurant-summary">${restaurant.summary}</div>
 			</div>
 			<div class="restaurant-links">
-				<a href="#">방문자 리뷰보기 &gt;</a>
-				<a href="#">리뷰 작성하기 &gt;</a>
+				<a href="#">View Reviews &gt;</a>
+				<a href="#">Write Review &gt;</a>
 			</div>
 		</article>
 	`).join("");
@@ -38,7 +52,7 @@ async function loadInfo() {
 	document.getElementById("tagline").textContent = info.subtitle;
 	document.getElementById("welcome-message").textContent = info.welcomeMessage;
 	document.getElementById("location-input").value = info.location;
-	document.getElementById("weather-location").textContent = `${info.location}의 날씨`;
+	document.getElementById("weather-location").textContent = `Weather around ${info.location}`;
 	document.getElementById("weather-temperature").textContent = info.temperature;
 	document.getElementById("weather-status").textContent = info.weatherStatus;
 	document.getElementById("dust-status").textContent = info.dustStatus;

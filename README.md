@@ -1,57 +1,55 @@
 # ward-app
 
-`ward-app`은 프로젝트분석설계 수업에서 예제로 사용할 수 있도록 만든 간단한 Spring Boot 목업 서비스입니다.
-현재 버전은 `WARD`라는 이름의 동네 음식 추천 화면을 중심으로 구성되어 있고, 실행하면 메인 화면에서 고척동/구일역 주변 지도 형태의 화면과 음식점 목록이 바로 보입니다.
+`ward-app` is a small Spring Boot sample project for a project analysis and design class.
+It shows a mock `WARD` landing page and loads restaurant data from MySQL.
 
-이 프로젝트는 완성형 상용 서비스가 아니라, 한 학기 프로젝트를 설명하거나 시연할 때 사용할 수 있는 학습용 예제에 초점을 둡니다.
+The current version focuses on a simple learning flow:
 
-## 1. 개발 환경
+- `Controller -> Service -> DAO -> MySQL`
+- static main page + JSON API
+- sample restaurant rows for demos
+
+## Stack
 
 - Java 21
 - Gradle Wrapper 9.4.1
 - Spring Boot 4.0.5
 - Spring Web MVC
-- 로컬 실행: Spring Boot 내장 Tomcat
-- 외부 배포: Apache Tomcat WAR 배포 가능
+- Spring JDBC
+- MySQL 8.x
 
-## 2. 프로젝트 목적
+## Features
 
-이 프로젝트의 목적은 다음과 같습니다.
+When the app starts, `http://localhost:8080` shows:
 
-- Spring Boot 기본 프로젝트 구조 익히기
-- `Controller -> Service -> VO` 흐름 익히기
-- 정적 화면과 JSON API를 함께 구성하는 방법 익히기
-- 이후 DB, 회원 기능, 리뷰 기능 등으로 확장할 수 있는 시작점 만들기
+- a `WARD` header
+- a search box
+- a weather card
+- a map-like mock section for the Guil Station / Gocheok-dong area
+- a restaurant list loaded from MySQL
 
-즉, 현재 프로젝트는 단순 REST API 실습만을 위한 구조가 아니라, 수업에서 설명하기 쉬운 `화면 + 샘플 API` 예제입니다.
+The weather section uses fixed sample values.
+The restaurant list is read from the `restaurant` table in MySQL.
 
-## 3. 현재 구현 내용
-
-기동 후 `http://localhost:8080` 으로 접속하면 다음과 같은 메인 화면이 표시됩니다.
-
-- 상단 브랜드 헤더
-- 검색창
-- 날씨 정보 영역
-- 고척동/구일역 주변을 표현한 지도 목업
-- 음식점 목록 카드
-
-실제 지도 API 연동보다는, 시안과 흐름을 보여주기 위한 목업 화면에 가깝습니다.
-수업용 예제이므로 구조는 단순하게 유지하고 데이터는 하드코딩된 샘플 데이터를 사용합니다.
-
-## 4. 프로젝트 구조
+## Structure
 
 ```text
 ward-app
 ├─ build.gradle
+├─ scripts
+│  └─ ec2
+│     └─ mysql-setup.sh
 ├─ src
 │  ├─ main
 │  │  ├─ java/com/ward/ward_app
 │  │  │  ├─ controller
 │  │  │  │  └─ HomeController.java
-│  │  │  ├─ service
-│  │  │  │  └─ HomeService.java
+│  │  │  ├─ dao
+│  │  │  │  └─ RestaurantDAO.java
 │  │  │  ├─ dto
 │  │  │  │  └─ MessageRequestDTO.java
+│  │  │  ├─ service
+│  │  │  │  └─ HomeService.java
 │  │  │  ├─ vo
 │  │  │  │  ├─ HomeVO.java
 │  │  │  │  ├─ MessageVO.java
@@ -70,121 +68,139 @@ ward-app
 └─ README.md
 ```
 
-## 5. 구성 설명
+## API
 
-### `WardAppApplication`
+- `GET /api/info`
+  Returns fixed data for the page header and weather card.
+- `GET /api/restaurants`
+  Returns restaurant rows from MySQL.
+- `GET /api/hello`
+  Simple sample endpoint.
+- `POST /api/messages`
+  Simple POST example endpoint.
 
-- Spring Boot 애플리케이션 시작 클래스입니다.
+## Database Settings
 
-### `ServletInitializer`
+Default DB settings in `src/main/resources/application.properties`:
 
-- WAR 파일을 외부 Tomcat에 배포할 때 사용하는 초기화 클래스입니다.
+```properties
+spring.datasource.url=jdbc:mysql://localhost:3306/ward_app?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=Asia/Seoul&characterEncoding=UTF-8
+spring.datasource.username=test
+spring.datasource.password=test
+```
 
-### `controller`
+You can also override them with environment variables:
 
-- 요청을 받는 계층입니다.
-- 현재는 메인 화면에서 사용하는 샘플 API를 제공합니다.
+- `DB_URL`
+- `DB_USERNAME`
+- `DB_PASSWORD`
 
-### `service`
+## EC2 MySQL Setup
 
-- 화면과 API에서 사용할 데이터를 조립하는 계층입니다.
-- 현재는 날씨 정보와 음식점 목록을 하드코딩 데이터로 반환합니다.
+Repository script:
 
-### `dto`
+- `scripts/ec2/mysql-setup.sh`
+- setup guide: `docs/ec2-mysql-setup.md`
 
-- 요청 데이터를 담는 객체입니다.
-- 현재는 POST 예제용 `MessageRequestDTO`가 있습니다.
+This script installs MySQL on EC2, creates the `ward_app` database, creates the `test/test` user, creates the `restaurant` table, and inserts sample rows.
 
-### `vo`
+If you want a direct copy/paste version on EC2:
 
-- 응답 데이터를 담는 객체입니다.
-- `HomeVO`, `MessageVO`, `RestaurantVO`를 사용합니다.
+```bash
+cat <<'EOF' > mysql-setup.sh
+#!/bin/bash
+set -euo pipefail
 
-### `static`
+echo "[1/6] Installing MySQL server"
+sudo apt update
+sudo DEBIAN_FRONTEND=noninteractive apt install -y mysql-server
 
-- 메인 화면을 구성하는 정적 리소스 경로입니다.
-- 현재 프로젝트의 첫 화면은 `static/index.html`을 통해 표시됩니다.
+echo "[2/6] Starting and enabling MySQL"
+sudo systemctl enable mysql
+sudo systemctl restart mysql
 
-## 6. 현재 API
+echo "[3/6] Configuring root authentication for local setup"
+sudo mysql <<'SQL'
+ALTER USER 'root'@'localhost' IDENTIFIED WITH mysql_native_password BY 'root';
+FLUSH PRIVILEGES;
+SQL
 
-### `GET /api/info`
+echo "[4/6] Creating database and application user"
+mysql -uroot -proot <<'SQL'
+CREATE DATABASE IF NOT EXISTS ward_app
+  CHARACTER SET utf8mb4
+  COLLATE utf8mb4_unicode_ci;
 
-메인 화면 상단에 필요한 기본 정보와 날씨 표시용 데이터를 반환합니다.
+CREATE USER IF NOT EXISTS 'test'@'localhost' IDENTIFIED BY 'test';
+ALTER USER 'test'@'localhost' IDENTIFIED BY 'test';
+GRANT ALL PRIVILEGES ON ward_app.* TO 'test'@'localhost';
+FLUSH PRIVILEGES;
+SQL
 
-### `GET /api/restaurants`
+echo "[5/6] Creating tables and seed data"
+mysql -uroot -proot ward_app <<'SQL'
+CREATE TABLE IF NOT EXISTS restaurant (
+    id BIGINT NOT NULL AUTO_INCREMENT,
+    name VARCHAR(100) NOT NULL,
+    category VARCHAR(100) NOT NULL,
+    summary VARCHAR(255) NOT NULL,
+    address VARCHAR(255) NOT NULL,
+    latitude DECIMAL(10, 7) NOT NULL,
+    longitude DECIMAL(10, 7) NOT NULL,
+    rating DECIMAL(2, 1) NOT NULL,
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    PRIMARY KEY (id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
-음식점 목록 샘플 데이터를 반환합니다.
+TRUNCATE TABLE restaurant;
 
-### `GET /api/hello`
+INSERT INTO restaurant (name, category, summary, address, latitude, longitude, rating) VALUES
+('Gocheok Kalguksu', 'Noodles, Dumplings', 'Warm soup-based menu suitable for a lightweight sample project.', '76-173 Gocheok-dong, Guro-gu, Seoul', 37.5009000, 126.8648000, 4.0),
+('Guil Bunsik', 'Snacks, Gimbap', 'Simple student-friendly menu for a class demo.', '63-3 Gocheok-dong, Guro-gu, Seoul', 37.4969000, 126.8690000, 4.0),
+('Gocheok Donkatsu', 'Donkatsu, Udon', 'Lunch-style mock restaurant near Guil Station.', '49 Gyeongin-ro 43-gil, Guro-gu, Seoul', 37.4976000, 126.8674000, 4.0),
+('Anyangcheon Pocha', 'Korean, Pub', 'Sample place used to explain list and marker connections.', '66-41 Gocheok-dong, Guro-gu, Seoul', 37.4987000, 126.8711000, 4.0);
+SQL
 
-기본 동작 확인용 예제 API입니다.
+echo "[6/6] Verifying inserted data"
+mysql -utest -ptest ward_app -e "SELECT id, name, category, rating FROM restaurant ORDER BY id;"
 
-### `POST /api/messages`
+echo
+echo "MySQL setup complete."
+echo "DB      : ward_app"
+echo "USER    : test"
+echo "PASSWORD: test"
+EOF
 
-간단한 요청/응답 구조를 보여주기 위한 POST 예제 API입니다.
+chmod +x mysql-setup.sh
+./mysql-setup.sh
+```
 
-## 7. 실행 방법
-
-### 로컬 실행
+## Run
 
 ```powershell
 .\gradlew.bat bootRun
 ```
 
-또는 IDE에서 `WardAppApplication`을 실행합니다.
-
-기본 주소:
+Main page:
 
 ```text
-http://localhost:8080
+http://localhost:8080/
 ```
 
-메인 화면:
+Restaurant API:
 
 ```text
-GET http://localhost:8080/
+http://localhost:8080/api/restaurants
 ```
 
-음식점 목록 API:
-
-```text
-GET http://localhost:8080/api/restaurants
-```
-
-### 테스트 실행
+Tests:
 
 ```powershell
 .\gradlew.bat test
 ```
 
-### WAR 파일 생성
+WAR build:
 
 ```powershell
 .\gradlew.bat bootWar
 ```
-
-생성된 WAR 파일은 외부 Apache Tomcat에 배포할 수 있습니다.
-
-## 8. 학습용 프로젝트로서의 특징
-
-이 프로젝트는 학습용 예제이므로 다음 원칙을 따릅니다.
-
-- 화면은 단순하고 직관적으로 구성
-- 계층 구조는 최소한으로 유지
-- 데이터는 우선 하드코딩으로 처리
-- 나중에 DB 연동이나 로그인 기능으로 확장 가능
-
-처음부터 너무 많은 기능을 넣기보다, 기본 구조를 이해하고 점진적으로 확장하는 데 적합한 예제입니다.
-
-## 9. 앞으로 확장할 수 있는 방향
-
-수업 진행에 따라 아래와 같은 확장이 가능합니다.
-
-- 회원가입 / 로그인
-- 리뷰 작성 / 리뷰 조회
-- 지역 검색 기능
-- 실제 지도 API 연동
-- DB 연동을 위한 `repository` 또는 `dao` 계층 추가
-- 관리자 화면 또는 상세 음식점 페이지 추가
-
-현재 버전은 그 출발점이 되는 목업 프로젝트입니다.
