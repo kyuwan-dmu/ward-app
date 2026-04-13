@@ -1,4 +1,5 @@
 #!/bin/bash
+bash <<'EOF'
 set -euo pipefail
 
 echo "[1/6] Installing MySQL server"
@@ -9,11 +10,21 @@ echo "[2/6] Starting and enabling MySQL"
 sudo systemctl enable mysql
 sudo systemctl restart mysql
 
-echo "[3/6] Configuring root authentication for local setup"
+echo "[3/6] Configuring MySQL for local and remote access"
+sudo sed -i "s/^[#[:space:]]*bind-address[[:space:]]*=.*/bind-address = 0.0.0.0/" /etc/mysql/mysql.conf.d/mysqld.cnf
+sudo systemctl restart mysql
+
+if sudo mysql -e "SELECT 1;" >/dev/null 2>&1; then
 sudo mysql <<'SQL'
 ALTER USER 'root'@'localhost' IDENTIFIED WITH mysql_native_password BY 'root';
 FLUSH PRIVILEGES;
 SQL
+else
+mysql -uroot -proot <<'SQL'
+ALTER USER 'root'@'localhost' IDENTIFIED WITH mysql_native_password BY 'root';
+FLUSH PRIVILEGES;
+SQL
+fi
 
 echo "[4/6] Creating database and application user"
 mysql -uroot -proot <<'SQL'
@@ -21,9 +32,14 @@ CREATE DATABASE IF NOT EXISTS ward_app
   CHARACTER SET utf8mb4
   COLLATE utf8mb4_unicode_ci;
 
-CREATE USER IF NOT EXISTS 'test'@'localhost' IDENTIFIED BY 'test';
-ALTER USER 'test'@'localhost' IDENTIFIED BY 'test';
+CREATE USER IF NOT EXISTS 'test'@'localhost' IDENTIFIED WITH mysql_native_password BY 'test';
+ALTER USER 'test'@'localhost' IDENTIFIED WITH mysql_native_password BY 'test';
 GRANT ALL PRIVILEGES ON ward_app.* TO 'test'@'localhost';
+
+CREATE USER IF NOT EXISTS 'test'@'%' IDENTIFIED WITH mysql_native_password BY 'test';
+ALTER USER 'test'@'%' IDENTIFIED WITH mysql_native_password BY 'test';
+GRANT ALL PRIVILEGES ON ward_app.* TO 'test'@'%';
+
 FLUSH PRIVILEGES;
 SQL
 
@@ -53,9 +69,12 @@ SQL
 
 echo "[6/6] Verifying inserted data"
 mysql -utest -ptest ward_app -e "SELECT id, name, category, rating FROM restaurant ORDER BY id;"
+mysql -uroot -proot -e "SELECT user, host, plugin FROM mysql.user WHERE user IN ('root', 'test') ORDER BY user, host;"
 
 echo
 echo "MySQL setup complete."
 echo "DB      : ward_app"
 echo "USER    : test"
 echo "PASSWORD: test"
+echo "REMOTE  : test account allowed from remote hosts"
+EOF

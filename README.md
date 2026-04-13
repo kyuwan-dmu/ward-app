@@ -36,6 +36,8 @@ The restaurant list is read from the `restaurant` table in MySQL.
 ```text
 ward-app
 ├─ build.gradle
+├─ docs
+│  └─ ec2-mysql-setup.md
 ├─ scripts
 │  └─ ec2
 │     └─ mysql-setup.sh
@@ -97,18 +99,20 @@ You can also override them with environment variables:
 
 ## EC2 MySQL Setup
 
-Repository script:
+Primary usage is copy-paste execution directly in the EC2 terminal.
+
+Reference files:
 
 - `scripts/ec2/mysql-setup.sh`
-- setup guide: `docs/ec2-mysql-setup.md`
+- `docs/ec2-mysql-setup.md`
 
-This script installs MySQL on EC2, creates the `ward_app` database, creates the `test/test` user, creates the `restaurant` table, and inserts sample rows.
+### Recommended: copy-paste directly into the EC2 shell
 
-If you want a direct copy/paste version on EC2:
+Copy everything below from `bash <<'EOF'` to the final `EOF` and paste it into the EC2 terminal at once.
+This version keeps `root` local-only in practice and opens the `test` account for remote tools such as DBeaver.
 
 ```bash
-cat <<'EOF' > mysql-setup.sh
-#!/bin/bash
+bash <<'EOF'
 set -euo pipefail
 
 echo "[1/6] Installing MySQL server"
@@ -119,11 +123,21 @@ echo "[2/6] Starting and enabling MySQL"
 sudo systemctl enable mysql
 sudo systemctl restart mysql
 
-echo "[3/6] Configuring root authentication for local setup"
+echo "[3/6] Configuring MySQL for local and remote access"
+sudo sed -i "s/^[#[:space:]]*bind-address[[:space:]]*=.*/bind-address = 0.0.0.0/" /etc/mysql/mysql.conf.d/mysqld.cnf
+sudo systemctl restart mysql
+
+if sudo mysql -e "SELECT 1;" >/dev/null 2>&1; then
 sudo mysql <<'SQL'
 ALTER USER 'root'@'localhost' IDENTIFIED WITH mysql_native_password BY 'root';
 FLUSH PRIVILEGES;
 SQL
+else
+mysql -uroot -proot <<'SQL'
+ALTER USER 'root'@'localhost' IDENTIFIED WITH mysql_native_password BY 'root';
+FLUSH PRIVILEGES;
+SQL
+fi
 
 echo "[4/6] Creating database and application user"
 mysql -uroot -proot <<'SQL'
@@ -131,9 +145,14 @@ CREATE DATABASE IF NOT EXISTS ward_app
   CHARACTER SET utf8mb4
   COLLATE utf8mb4_unicode_ci;
 
-CREATE USER IF NOT EXISTS 'test'@'localhost' IDENTIFIED BY 'test';
-ALTER USER 'test'@'localhost' IDENTIFIED BY 'test';
+CREATE USER IF NOT EXISTS 'test'@'localhost' IDENTIFIED WITH mysql_native_password BY 'test';
+ALTER USER 'test'@'localhost' IDENTIFIED WITH mysql_native_password BY 'test';
 GRANT ALL PRIVILEGES ON ward_app.* TO 'test'@'localhost';
+
+CREATE USER IF NOT EXISTS 'test'@'%' IDENTIFIED WITH mysql_native_password BY 'test';
+ALTER USER 'test'@'%' IDENTIFIED WITH mysql_native_password BY 'test';
+GRANT ALL PRIVILEGES ON ward_app.* TO 'test'@'%';
+
 FLUSH PRIVILEGES;
 SQL
 
@@ -163,17 +182,35 @@ SQL
 
 echo "[6/6] Verifying inserted data"
 mysql -utest -ptest ward_app -e "SELECT id, name, category, rating FROM restaurant ORDER BY id;"
+mysql -uroot -proot -e "SELECT user, host, plugin FROM mysql.user WHERE user IN ('root', 'test') ORDER BY user, host;"
 
 echo
 echo "MySQL setup complete."
 echo "DB      : ward_app"
 echo "USER    : test"
 echo "PASSWORD: test"
+echo "REMOTE  : test account allowed from remote hosts"
 EOF
-
-chmod +x mysql-setup.sh
-./mysql-setup.sh
 ```
+
+### Optional: run the repository file directly
+
+```bash
+cd ~/ward-app
+chmod +x scripts/ec2/mysql-setup.sh
+./scripts/ec2/mysql-setup.sh
+```
+
+### DBeaver connection values
+
+- Host: EC2 public IP or Elastic IP
+- Port: `3306`
+- Database: `ward_app`
+- Username: `test`
+- Password: `test`
+
+You still need the EC2 security group to allow inbound `3306` from your own public IP.
+The script sets the `test` account to `mysql_native_password` to avoid the common DBeaver `Public Key Retrieval is not allowed` error.
 
 ## Run
 
