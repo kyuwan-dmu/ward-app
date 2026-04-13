@@ -1,13 +1,13 @@
 # ward-app
 
-`ward-app` is a small Spring Boot sample project for a project analysis and design class.
-It shows a mock `WARD` landing page and loads restaurant data from MySQL.
+`ward-app`은 프로젝트 분석 및 설계 수업을 위해 만든 소규모 Spring Boot 샘플입니다.
+`WARD` 랜딩 페이지 목업을 보여주면서 MySQL에서 식당 데이터를 읽어옵니다.
 
-The current version focuses on a simple learning flow:
+현재 버전은 다음과 같은 단순 학습 흐름을 목표로 합니다.
 
 - `Controller -> Service -> DAO -> MySQL`
-- static main page + JSON API
-- sample restaurant rows for demos
+- 정적 메인 페이지 + JSON API
+- 데모용 식당 샘플 데이터
 
 ## Stack
 
@@ -18,20 +18,20 @@ The current version focuses on a simple learning flow:
 - Spring JDBC
 - MySQL 8.x
 
-## Features
+## 주요 기능
 
-When the app starts, `http://localhost:8080` shows:
+앱을 실행하면 `http://localhost:8080`에서 아래 요소를 확인할 수 있습니다.
 
-- a `WARD` header
-- a search box
-- a weather card
-- a map-like mock section for the Guil Station / Gocheok-dong area
-- a restaurant list loaded from MySQL
+- `WARD` 헤더
+- 검색창
+- 날씨 카드
+- 구일역·고척동 일대 지도 형태의 목업
+- MySQL에서 불러온 식당 리스트
 
-The weather section uses fixed sample values.
-The restaurant list is read from the `restaurant` table in MySQL.
+날씨 카드는 고정 샘플 값을 사용합니다.
+식당 리스트는 MySQL `restaurant` 테이블에서 조회합니다.
 
-## Structure
+## 구조
 
 ```text
 ward-app
@@ -72,18 +72,18 @@ ward-app
 
 ## API
 
-- `GET /api/info`
-  Returns fixed data for the page header and weather card.
-- `GET /api/restaurants`
-  Returns restaurant rows from MySQL.
-- `GET /api/hello`
-  Simple sample endpoint.
-- `POST /api/messages`
-  Simple POST example endpoint.
+- `GET /api/info`  
+  페이지 헤더와 날씨 카드에 쓰이는 고정 데이터를 반환합니다.
+- `GET /api/restaurants`  
+  MySQL의 식당 데이터를 반환합니다.
+- `GET /api/hello`  
+  간단한 샘플 GET 엔드포인트입니다.
+- `POST /api/messages`  
+  POST 예제를 위한 엔드포인트입니다.
 
 ## Database Settings
 
-Default DB settings in `src/main/resources/application.properties`:
+`src/main/resources/application.properties`의 기본 DB 설정:
 
 ```properties
 spring.datasource.url=jdbc:mysql://localhost:3306/ward_app?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=Asia/Seoul&characterEncoding=UTF-8
@@ -91,7 +91,7 @@ spring.datasource.username=test
 spring.datasource.password=test
 ```
 
-You can also override them with environment variables:
+아래 환경 변수로 덮어쓸 수도 있습니다.
 
 - `DB_URL`
 - `DB_USERNAME`
@@ -99,17 +99,17 @@ You can also override them with environment variables:
 
 ## EC2 MySQL Setup
 
-Primary usage is copy-paste execution directly in the EC2 terminal.
+목적은 EC2 터미널에서 그대로 복사·붙여넣어 실행하는 것입니다.
 
-Reference files:
+참고 파일:
 
 - `scripts/ec2/mysql-setup.sh`
 - `docs/ec2-mysql-setup.md`
 
-### Recommended: copy-paste directly into the EC2 shell
+### 추천: EC2 셸에 직접 붙여넣기
 
-Copy everything below from `bash <<'EOF'` to the final `EOF` and paste it into the EC2 terminal at once.
-This version keeps `root` local-only in practice and opens the `test` account for remote tools such as DBeaver.
+아래 스크립트는 `bash <<'EOF'`부터 마지막 `EOF`까지 한 번에 복사해 붙여넣으면 됩니다.
+실제 사용 시 `root` 계정은 로컬 전용으로 두고, DBeaver 같은 원격 툴은 `test` 계정을 사용하도록 열어 둡니다.
 
 ```bash
 bash <<'EOF'
@@ -193,7 +193,7 @@ echo "REMOTE  : test account allowed from remote hosts"
 EOF
 ```
 
-### Optional: run the repository file directly
+### 선택: 저장소 스크립트를 직접 실행
 
 ```bash
 cd ~/ward-app
@@ -201,42 +201,42 @@ chmod +x scripts/ec2/mysql-setup.sh
 ./scripts/ec2/mysql-setup.sh
 ```
 
-### DBeaver connection values
+### DBeaver 접속 정보
 
-- Host: EC2 public IP or Elastic IP
+- Host: EC2 Public IP 또는 Elastic IP
 - Port: `3306`
 - Database: `ward_app`
 - Username: `test`
 - Password: `test`
 
-You still need the EC2 security group to allow inbound `3306` from your own public IP.
-The script sets the `test` account to `mysql_native_password` to avoid the common DBeaver `Public Key Retrieval is not allowed` error.
+EC2 보안 그룹에서 개인 공인 IP에 대해 `3306` 인바운드를 허용해야 합니다.
+스크립트는 `test` 계정 인증 방식을 `mysql_native_password`로 맞춰 DBeaver의 `Public Key Retrieval is not allowed` 오류를 피합니다.
 
-## Run
+## 실행
 
 ```powershell
 .\gradlew.bat bootRun
 ```
 
-Main page:
+메인 페이지:
 
 ```text
 http://localhost:8080/
 ```
 
-Restaurant API:
+식당 API:
 
 ```text
 http://localhost:8080/api/restaurants
 ```
 
-Tests:
+테스트:
 
 ```powershell
 .\gradlew.bat test
 ```
 
-WAR build:
+WAR 빌드:
 
 ```powershell
 .\gradlew.bat bootWar
