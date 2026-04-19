@@ -1,0 +1,23 @@
+name: Deploy to EC2
+
+on:
+  push:
+    branches: [ "main" ]
+
+jobs:
+  deploy:
+    name: build-and-deploy
+    runs-on: self-hosted
+
+    steps:
+      - name: Checkout source
+        uses: actions/checkout@v4
+
+      - name: Grant execute permission
+        run: chmod +x ./build.sh ./run.sh
+
+      - name: Build project
+        run: ./build.sh
+
+      - name: Deploy & restart Tomcat
+        run: ./run.sh
