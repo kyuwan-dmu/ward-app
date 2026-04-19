@@ -18,6 +18,10 @@ jobs:
 
       - name: Build project
         run: ./build.sh
+        env:
+          APP_DIR: ${{ github.workspace }}
 
       - name: Deploy & restart Tomcat
         run: ./run.sh
+        env:
+          APP_DIR: ${{ github.workspace }}

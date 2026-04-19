@@ -7,7 +7,11 @@ echo "[1/5] move to app dir: $APP_DIR"
 cd "$APP_DIR"
 
 echo "[2/5] pull latest main"
-git pull --ff-only origin main
+if [ -z "${CI:-}" ]; then
+  git pull --ff-only origin main
+else
+  echo "  -> skipped (CI: checkout already has latest)"
+fi
 
 echo "[3/5] ensure gradle wrapper is executable"
 chmod +x ./gradlew
