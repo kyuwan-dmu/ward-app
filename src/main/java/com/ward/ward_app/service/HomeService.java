@@ -21,7 +21,7 @@ public class HomeService {
 	public HomeVO getHomeData() {
 		return new HomeVO(
 			"WARD",
-			"Neighborhood food recommendations - Auto Deployed!",
+			"Neighborhood food recommendations - Auto Deployed!Neighborhood food recommendations - Auto DeployedNeighborhood food recommendations - Auto DeployedNeighborhood food recommendations - Auto Deployed",
 			"Welcome, Gangaji!",
 			"Guil Station",
 			"Cloudy",
